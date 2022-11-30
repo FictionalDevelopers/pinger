@@ -1,10 +1,16 @@
 import { Module } from '@nestjs/common';
 import { PingController } from './ping/ping.controller';
-import { PingService } from './ping/ping.service';
+import { ChildProcessPingService } from './ping/service/child-process.ping.service';
+import { ServiceProvider } from './provider-tokens/service-provider-tokens';
 
 @Module({
   imports: [],
   controllers: [PingController],
-  providers: [PingService],
+  providers: [
+    {
+      provide: ServiceProvider.PingService,
+      useClass: ChildProcessPingService,
+    },
+  ],
 })
 export class AppModule {}

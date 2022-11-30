@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { spawn } from 'child_process';
+import { NoConnectionError } from 'src/errors/no-connection.error';
 import { IPAddress } from 'src/types/ip-address';
 
 @Injectable()
-export class PingService {
+export class ChildProcessPingService {
   async pingIp(ip: IPAddress): Promise<void> {
     return new Promise((resolve, reject) => {
       let result = '';
@@ -17,7 +18,7 @@ export class PingService {
           return resolve();
         }
 
-        return reject(new Error('No connection'));
+        return reject(new NoConnectionError());
       });
 
       ping.stdout.on('data', (chunk: Buffer) => {

@@ -1,10 +1,20 @@
-import { BadGatewayException, Controller, Get, Param } from '@nestjs/common';
+import {
+  BadGatewayException,
+  Controller,
+  Get,
+  Inject,
+  Param,
+} from '@nestjs/common';
+import { ServiceProvider } from 'src/provider-tokens/service-provider-tokens';
 import { IPAddress } from 'src/types/ip-address';
-import { PingService } from './ping.service';
+import { PingService } from './service/ping.service';
 
 @Controller('ping')
 export class PingController {
-  constructor(private readonly pingService: PingService) {}
+  constructor(
+    @Inject(ServiceProvider.PingService)
+    private readonly pingService: PingService,
+  ) {}
 
   @Get('/:ip')
   async ping(@Param('ip') ip: string) {

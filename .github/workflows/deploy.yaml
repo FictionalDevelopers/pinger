@@ -9,9 +9,9 @@ on:
     paths:
       - .github/**
       - deploy/**
-      - pinger/package.json
-      - pinger/package-lock.json
-      - pinger/src/**
+      - checker/package.json
+      - checker/package-lock.json
+      - checker/src/**
 
 concurrency:
   group: pinger

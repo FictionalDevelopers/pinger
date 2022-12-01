@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: pinger
-          image: dmitryhoncharuk/pinger:stage
+          image: fictionaldev/pinger:stage
           readinessProbe:
             httpGet:
               port: 3000

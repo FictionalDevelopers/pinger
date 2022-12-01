@@ -5,7 +5,7 @@ import { DummyPingHistoryService } from './ping/ping-history/ping-history.servic
 import { PingController } from './ping/ping.controller';
 import { RepositoryProvider } from './provider-tokens/repository-provider-tokens';
 import { ServiceProvider } from './provider-tokens/service-provider-tokens';
-import { MockPingService } from './ping/ping-service/mocks/ping.service';
+import { ChildProcessPingService } from './ping/ping-service/child-process.ping.service';
 
 @Module({
   imports: [],
@@ -13,8 +13,7 @@ import { MockPingService } from './ping/ping-service/mocks/ping.service';
   providers: [
     {
       provide: ServiceProvider.Ping,
-      // useClass: ChildProcessPingService,
-      useClass: MockPingService,
+      useClass: ChildProcessPingService,
     },
     {
       provide: ServiceProvider.PingHistory,

@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: pinger
+  name: pinger-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pinger
+  template:
+    metadata:
+      labels:
+        app: pinger
+    spec:
+      containers:
+        - name: pinger
+          image: dmitryhoncharuk/pinger:stage
+          readinessProbe:
+            httpGet:
+              port: 3000
+              path: /healthz
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: pinger-env-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: pinger
+  name: pinger-cluster-ip-service
+spec:
+  type: ClusterIP
+  selector:
+    app: pinger
+  ports:
+    - name: pinger
+      protocol: TCP
+      port: 3000
+      targetPort: 3000

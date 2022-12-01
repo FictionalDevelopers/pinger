@@ -23,6 +23,7 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
           imagePullPolicy: Always
+
 ---
 apiVersion: v1
 kind: Service

@@ -1,3 +1,5 @@
-export enum ServiceProvider {
-  PingService = 'PING_SERVICE',
-}
+export const ServiceProvider = {
+  Ping: Symbol(),
+  PingHistory: Symbol(),
+  PingEffectNotificationService: Symbol(),
+};

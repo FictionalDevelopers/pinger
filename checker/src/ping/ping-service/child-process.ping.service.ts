@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { spawn } from 'child_process';
-import { NoConnectionError } from 'src/errors/no-connection.error';
 import { IPAddress } from 'src/types/ip-address';
+import { TargetStatus } from './entities/target-status';
+import { PingService } from './ping.service';
 
 @Injectable()
-export class ChildProcessPingService {
-  async pingIp(ip: IPAddress): Promise<void> {
+export class ChildProcessPingService implements PingService {
+  async pingIp(ip: IPAddress): Promise<TargetStatus> {
     return new Promise((resolve, reject) => {
       let result = '';
 
@@ -15,10 +16,13 @@ export class ChildProcessPingService {
 
       ping.once('close', () => {
         if (result.includes('1 packets received')) {
-          return resolve();
         }
 
-        return reject(new NoConnectionError());
+        return resolve(
+          result.includes('1 packets received')
+            ? TargetStatus.Online
+            : TargetStatus.Offline,
+        );
       });
 
       ping.stdout.on('data', (chunk: Buffer) => {

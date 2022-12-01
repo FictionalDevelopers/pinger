@@ -1,15 +1,32 @@
 import { Module } from '@nestjs/common';
+import { DummyPingEffectNotificationService } from './ping/ping-effect-handler/ping-effect-notification.service';
+import { DummyPingHistoryRepository } from './ping/ping-history/ping-history.repository';
+import { DummyPingHistoryService } from './ping/ping-history/ping-history.service';
 import { PingController } from './ping/ping.controller';
-import { ChildProcessPingService } from './ping/service/child-process.ping.service';
+import { RepositoryProvider } from './provider-tokens/repository-provider-tokens';
 import { ServiceProvider } from './provider-tokens/service-provider-tokens';
+import { MockPingService } from './ping/ping-service/mocks/ping.service';
 
 @Module({
   imports: [],
   controllers: [PingController],
   providers: [
     {
-      provide: ServiceProvider.PingService,
-      useClass: ChildProcessPingService,
+      provide: ServiceProvider.Ping,
+      // useClass: ChildProcessPingService,
+      useClass: MockPingService,
+    },
+    {
+      provide: ServiceProvider.PingHistory,
+      useClass: DummyPingHistoryService,
+    },
+    {
+      provide: ServiceProvider.PingEffectNotificationService,
+      useClass: DummyPingEffectNotificationService,
+    },
+    {
+      provide: RepositoryProvider.PingHistory,
+      useClass: DummyPingHistoryRepository,
     },
   ],
 })

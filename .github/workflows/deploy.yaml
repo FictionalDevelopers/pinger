@@ -45,7 +45,7 @@ jobs:
       - name: 🐳 Docker build
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ./checker
           push: true
           tags: dmitryhoncharuk/pinger:stage
           cache-from: type=local,src=/tmp/.buildx-cache

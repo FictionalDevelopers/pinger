@@ -1,0 +1,116 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+    paths:
+      - package.json
+      - package-lock.json
+      - Dockerfile
+      - remix.config.js
+      - .github/**
+      - public/**
+      - app/**
+      - prisma/**
+      - deploy/**
+
+concurrency:
+  group: arthouse
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: Staging
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      # Setup cache
+      - name: ⚡️ Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: 🔑 Docker Login
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: 🐳 Docker build
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: dmitryhoncharuk/arthouse:stage
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+
+      - name: 🚚 Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+  k8s-config:
+    name: k8s config
+    runs-on: ubuntu-latest
+    environment: Staging
+    needs:
+      - build
+    steps:
+      - name: Digitalocean login
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Save Digitalocean k8s config
+        run: doctl kubernetes cluster kubeconfig save ficdev
+
+      - name: Create namespace
+        run: kubectl create namespace arthouse || true
+
+      - name: Set configmap
+        run: |
+          kubectl -n=arthouse delete configmap arthouse-env-config || true
+          kubectl -n=arthouse create configmap arthouse-env-config \
+              --from-literal=DATABASE_URL=${{ secrets.DATABASE_URL }} \
+              --from-literal=JWT_SECRET=${{ secrets.JWT_SECRET }} \
+              --from-literal=GOOGLE_CLIENT_ID="968212429669-u2971f8fp53vpkup93hqrvn12hc17s8s" \
+              --from-literal=AWS_REGION=${{ secrets.AWS_REGION }} \
+              --from-literal=AWS_BUCKET=${{ secrets.AWS_BUCKET }} \
+              --from-literal=AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
+              --from-literal=AWS_SECRET_ACCESS_KEY_ID=${{ secrets.AWS_SECRET_ACCESS_KEY_ID }} \
+              --from-literal=PROJECT_PASSWORD_KEY=${{ secrets.PROJECT_PASSWORD_KEY }} \
+              --from-literal=ALBUM_PASSWORD_KEY=${{ secrets.ALBUM_PASSWORD_KEY }} \
+              --from-literal=SENDINBLUE_API_KEY=${{ secrets.SENDINBLUE_API_KEY }} \
+              --from-literal=MAGIC_LINK_ENCRYPTION_KEY=${{ secrets.MAGIC_LINK_ENCRYPTION_KEY }} \
+
+  deploy:
+    runs-on: ubuntu-latest
+    environment: Staging
+    needs:
+      - k8s-config
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Digitalocean login
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Save Digitalocean k8s config
+        run: doctl kubernetes cluster kubeconfig save ficdev
+
+      - name: Apply k8s configs
+        run: kubectl -n=arthouse apply -f deploy
+
+      - name: Restart deployment
+        run: kubectl -n=arthouse rollout restart deployment arthouse-deployment

@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { RepositoryProvider } from 'src/provider-tokens/repository-provider-tokens';
 import { ServiceProvider } from 'src/provider-tokens/service-provider-tokens';
 import { PingHistoryEntry } from '../entities/ping-history-entry.entity';
-import { PingEffectNotificationService } from '../ping-effect-handler/ping-effect-notification.service';
+import { PingEffectNotificationService } from '../ping-effect-notification/ping-effect-notification.service';
 import {
   IdlePingEffect,
   PingEffect,

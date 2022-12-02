@@ -3,9 +3,7 @@ import { spawn } from 'child_process';
 import { IPAddress } from 'src/types/ip-address';
 import { TargetStatus } from './entities/target-status';
 import { PingService } from './ping.service';
-
-const rejectAfter = (time: number, promise: Promise<any>) =>
-  Promise.race([promise, new Promise((_, reject) => setTimeout(reject, time))]);
+import { rejectAfter } from '../../utils/promise/reject-after';
 
 @Injectable()
 export class ChildProcessPingService implements PingService {
@@ -20,14 +18,6 @@ export class ChildProcessPingService implements PingService {
         ping.once('error', reject);
 
         ping.once('close', () => {
-          console.log(
-            '[RESULT]',
-            result,
-            /1\s+(?:packets )?received/.test(result)
-              ? TargetStatus.Online
-              : TargetStatus.Offline,
-          );
-
           return resolve(
             /1\s+(?:packets )?received/.test(result)
               ? TargetStatus.Online

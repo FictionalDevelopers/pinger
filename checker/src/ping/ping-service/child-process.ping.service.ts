@@ -15,7 +15,13 @@ export class ChildProcessPingService implements PingService {
       ping.once('error', reject);
 
       ping.once('close', () => {
-        console.log('[RESULT]', result);
+        console.log(
+          '[RESULT]',
+          result,
+          result.includes('1 packets received')
+            ? TargetStatus.Online
+            : TargetStatus.Offline,
+        );
 
         return resolve(
           result.includes('1 packets received')

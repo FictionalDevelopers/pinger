@@ -39,6 +39,6 @@ export class ChildProcessPingService implements PingService {
           result += `\n${chunk.toString('utf-8')}`;
         });
       }),
-    );
+    ).catch(() => TargetStatus.Offline);
   }
 }

@@ -6,6 +6,9 @@ WORKDIR /usr/src/app
 
 ENV NODE_ENV production
 
+RUN apt-get update -y
+RUN apt-get install -y iputils-ping
+
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
 COPY package*.json ./
 

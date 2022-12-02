@@ -18,13 +18,13 @@ export class ChildProcessPingService implements PingService {
         console.log(
           '[RESULT]',
           result,
-          result.includes('1 packets received')
+          /1\s+(?:packets )?received/.test(result)
             ? TargetStatus.Online
             : TargetStatus.Offline,
         );
 
         return resolve(
-          result.includes('1 packets received')
+          /1\s+(?:packets )?received/.test(result)
             ? TargetStatus.Online
             : TargetStatus.Offline,
         );

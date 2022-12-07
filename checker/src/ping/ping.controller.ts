@@ -3,7 +3,7 @@ import {
   Controller,
   Get,
   Inject,
-  Param,
+  Query,
 } from '@nestjs/common';
 import { ServiceProvider } from 'src/provider-tokens/service-provider-tokens';
 import { IPAddress } from 'src/types/ip-address';
@@ -15,18 +15,17 @@ export class PingController {
   constructor(
     @Inject(ServiceProvider.Ping)
     private readonly pingService: PingService,
-
     @Inject(ServiceProvider.PingHistory)
     private readonly pingHistoryService: PingHistoryService,
   ) {}
 
-  @Get('/:ip')
-  async ping(@Param('ip') ip: string) {
+  @Get('/')
+  async ping(@Query('host') host: string) {
     try {
-      const status = await this.pingService.pingIp(IPAddress.fromString(ip));
+      const status = await this.pingService.pingIp(IPAddress.fromString(host));
 
       await this.pingHistoryService.acknowledge({
-        host: ip,
+        host,
         status,
         time: new Date(),
       });

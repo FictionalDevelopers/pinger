@@ -1,0 +1,31 @@
+name = "scheduler"
+main = "src/index.ts"
+compatibility_date = "2022-12-02"
+
+kv_namespaces = [
+    { binding = "PINGER", id = "6b967325692b4b4a8c3b81c3160ddb6b", preview_id = "a0d1ecda100341dfb3ba337d385e2589"  }
+]
+
+[triggers]
+crons = [ "* * * * *" ]
+#crons = [ "*/5 * * * *" ]
+
+[durable_objects]
+bindings = [
+    { name = "IP_STATE", class_name = "IPState" }
+]
+
+[[queues.producers]]
+queue = "ping-queue"
+binding = "PING_QUEUE"
+
+[[queues.consumers]]
+queue = "ping-queue"
+max_batch_size = 10
+max_batch_timeout = 30
+max_retries = 10
+dead_letter_queue = "my-queue-dlq"
+
+[[migrations]]
+tag = "v1" # Should be unique for each entry
+new_classes = ["IPState"]
